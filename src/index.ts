@@ -6,6 +6,7 @@ import InjectSubpackageRequirePlugin from './inject-require-plugin'
 
 /**
  * 生产共享 chunk
+ * TODO: 样式支持
  * @param subPackages
  * @returns
  */
@@ -35,7 +36,7 @@ function generateCacheGroups(subPackages: SubPackageInfo[], priority: number) {
       test(module: Module & { reasons?: Array<{ module: Module }> }) {
         // Taro 入口、页面、配置不能放到共享 chunk 中
         // @ts-ignore
-        if (module.miniType != null || module.context?.includes('@tarojs')) {
+        if (module.miniType != null || module.context?.includes('@tarojs') || module.type !== 'javascript/auto') {
           return false
         }
 
