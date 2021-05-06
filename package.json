@@ -1,0 +1,24 @@
+{
+  "name": "taro-plugin-subpackage-optimize",
+  "version": "0.1.0",
+  "description": "Taro 小程序分包优化",
+  "main": "./dist/index.js",
+  "author": "ivan <carney520@hotmail.com>",
+  "license": "MIT",
+  "scripts": {
+    "watch": "tsc --watch",
+    "build": "tsc"
+  },
+  "files": [
+    "dist"
+  ],
+  "devDependencies": {
+    "@tarojs/service": "^3.2.7",
+    "@types/node": "^15.0.2",
+    "@types/webpack": "4.*",
+    "@types/webpack-sources": "^2.1.0",
+    "typescript": "^4.2.4",
+    "webpack": "^5.36.2"
+  },
+  "repository": "git@github.com:ivan-94/taro-plugin-polymorphic.git"
+}
