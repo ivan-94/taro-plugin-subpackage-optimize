@@ -23,7 +23,7 @@ export interface SubPackageInfo {
   /**
    * 分包页面
    */
-  pages: string
+  pages: Set<String>
 }
 
 /**
@@ -71,7 +71,7 @@ export function getSubpackages() {
         context: sub.root,
         name: sub.name || path.basename(sub.root),
         chunkName: path.posix.join(sub.root, SHARE_CHUNK_NAME),
-        pages: sub.pages,
+        pages: new Set(sub.pages),
       })
     })
   }

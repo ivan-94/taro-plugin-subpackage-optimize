@@ -34,6 +34,10 @@ export default class InjectSubpackageRequirePlugin implements WebpackPluginInsta
         if (subpackageHasShareChunks && subpackageHasShareChunks.length) {
           for (const pkg of subpackageHasShareChunks) {
             if (chunk.entryModule && chunk.entryModule.context?.startsWith(pkg.path)) {
+              // 更新页面列表, watch 模式页面可能动态增减
+              // @ts-ignore
+              pkg.pages.add(path.posix.relative(pkg.context, chunk.id || chunk.entryModule.name))
+
               // 添加 require
               return addRequireToSource(getIdOrName(chunk), modules, pkg.chunkName)
             }
@@ -51,7 +55,14 @@ export default class InjectSubpackageRequirePlugin implements WebpackPluginInsta
           if (assets[assetName]) {
             // 需要为每个页面样式都添加 @import
             for (const page of subpackage.pages) {
+              const pageScriptId = path.posix.join(subpackage.context, page + '.js')
               const pageStyleId = path.posix.join(subpackage.context, page + this.styleExt)
+
+              if (!assets[pageScriptId]) {
+                // 页面不存在
+                continue
+              }
+
               const source = new ConcatSource()
               const importStatement = `@import ${JSON.stringify(
                 promoteRelativePath(path.relative(pageStyleId, assetName))
