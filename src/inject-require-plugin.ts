@@ -1,12 +1,17 @@
+import path from 'path'
 import { ConcatSource } from 'webpack-sources'
+import { promoteRelativePath } from '@tarojs/helper'
 import { WebpackPluginInstance, Compiler, Chunk } from 'webpack'
-import { SubPackageInfo, addRequireToSource, getIdOrName, SHARE_CHUNK_NAME } from './utils'
+import { urlToRequest } from 'loader-utils'
+import { SubPackageInfo, addRequireToSource, getIdOrName, SHARE_CHUNK_NAME, STYLE_EXTS } from './utils'
 
 const PLUGIN_NAME = 'inject-subpackage-require'
 
 export default class InjectSubpackageRequirePlugin implements WebpackPluginInstance {
   static NAME = PLUGIN_NAME
   private subPackageRoots: SubPackageInfo[]
+  private styleExt = STYLE_EXTS[process.env.TARO_ENV!]
+
   constructor(subPackageRoots: SubPackageInfo[]) {
     this.subPackageRoots = subPackageRoots
   }
@@ -22,13 +27,46 @@ export default class InjectSubpackageRequirePlugin implements WebpackPluginInsta
         })
       })
 
-      // 给分包每个页面添加上 require
+      /**
+       * 给分包每个页面添加上 require
+       */
       comp.chunkTemplate.hooks.renderWithEntry.tap(PLUGIN_NAME, (modules: ConcatSource, chunk: Chunk) => {
         if (subpackageHasShareChunks && subpackageHasShareChunks.length) {
           for (const pkg of subpackageHasShareChunks) {
             if (chunk.entryModule && chunk.entryModule.context?.startsWith(pkg.path)) {
               // 添加 require
               return addRequireToSource(getIdOrName(chunk), modules, pkg.chunkName)
+            }
+          }
+        }
+      })
+
+      /**
+       * 注入共享样式导入语句
+       */
+      comp.hooks.afterOptimizeAssets.tap(PLUGIN_NAME, (assets) => {
+        for (const subpackage of subpackageHasShareChunks) {
+          // 有共享的样式 chunk
+          const assetName = `${subpackage.chunkName}${this.styleExt}`
+          if (assets[assetName]) {
+            // 需要为每个页面样式都添加 @import
+            for (const page of subpackage.pages) {
+              const pageStyleId = path.posix.join(subpackage.context, page + this.styleExt)
+              const source = new ConcatSource()
+              const importStatement = `@import ${JSON.stringify(
+                promoteRelativePath(path.relative(pageStyleId, assetName))
+              )};`
+              if (!assets[pageStyleId]) {
+                // 没有添加 chunk, 手动添加
+                source.add(importStatement)
+              } else {
+                source.add(assets[pageStyleId].source() as string)
+                source.add('\n')
+                source.add(importStatement)
+              }
+
+              // @ts-ignore
+              assets[pageStyleId] = source
             }
           }
         }

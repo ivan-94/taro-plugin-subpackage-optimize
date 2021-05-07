@@ -20,6 +20,22 @@ export interface SubPackageInfo {
    * 分包共享 chunk 名称
    */
   chunkName: string
+  /**
+   * 分包页面
+   */
+  pages: string
+}
+
+/**
+ * 小程序平台 CSS 扩展名
+ */
+export const STYLE_EXTS: { [env: string]: string } = {
+  weapp: '.wxss',
+  swan: '.css',
+  alipay: '.acss',
+  tt: '.ttss',
+  qq: '.qss',
+  jd: '.jxss',
 }
 
 export const SHARE_CHUNK_NAME = '__subpackage_shared__'
@@ -49,12 +65,13 @@ export function getSubpackages() {
   const subPackageRoots: SubPackageInfo[] = []
 
   if (appConfig.subPackages && appConfig.subPackages.length) {
-    appConfig.subPackages.forEach((sub: { root: string; name?: string }) => {
+    appConfig.subPackages.forEach((sub: { root: string; name?: string; pages: string }) => {
       subPackageRoots.push({
         path: path.join(ROOT, 'src', sub.root),
         context: sub.root,
         name: sub.name || path.basename(sub.root),
         chunkName: path.posix.join(sub.root, SHARE_CHUNK_NAME),
+        pages: sub.pages,
       })
     })
   }
@@ -88,8 +105,8 @@ export function getIdOrName(chunk: Chunk) {
 
 /**
  * 获取 webpack module id
- * @param module 
- * @returns 
+ * @param module
+ * @returns
  */
 export function getModuleUniqId(module: Module) {
   // @ts-ignore

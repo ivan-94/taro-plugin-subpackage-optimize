@@ -7,6 +7,7 @@ import InjectSubpackageRequirePlugin from './inject-require-plugin'
 /**
  * 生产共享 chunk
  * TODO: 样式支持
+ * TODO: 分包依赖允许冗余
  * @param subPackages
  * @returns
  */
