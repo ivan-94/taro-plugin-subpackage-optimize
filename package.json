@@ -1,10 +1,14 @@
 {
   "name": "taro-plugin-subpackage-optimize",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Taro 小程序分包优化",
   "main": "./dist/index.js",
   "author": "ivan <carney520@hotmail.com>",
   "license": "MIT",
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org",
+    "access": "public"
+  },
   "scripts": {
     "watch": "tsc --watch",
     "build": "tsc"

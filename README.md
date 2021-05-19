@@ -1,5 +1,4 @@
-(开发中)
-# taro-plugin-subpackage-optimize 🚧
+# taro-plugin-subpackage-optimize
 
 Taro 3.x **小程序端**分包优化
 
